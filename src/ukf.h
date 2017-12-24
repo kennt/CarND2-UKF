@@ -67,6 +67,13 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  ///* Sigma point spreading parameter using augmented size
+  double lambda_aug_;
+
+  ///* File streams to hold the NIS data for lidar and radar, respectively
+  std::ofstream lidar_nis_stream_;
+  std::ofstream radar_nis_stream_;
+
 
   /**
    * Constructor
@@ -102,6 +109,21 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+//private:
+public:
+  VectorXd PredictVector(const VectorXd &inVector, double delta_t, double noise_a, double noise_yaw);
+  VectorXd PredictAugVector(const VectorXd &inVector, double delta_t);
+  void GenerateSigmaPoints(MatrixXd* Xsig_out);
+  void AugmentedSigmaPoints(MatrixXd* Xsig_out);
+  void SigmaPointPrediction(MatrixXd* Xsig_out, const MatrixXd &Xsig_aug, double delta_t);
+  void PredictMeanAndCovariance(VectorXd* x_out, MatrixXd* P_out);
+
+  void PredictRadarMeasurement(VectorXd *z_out, MatrixXd *S_out, MatrixXd *Zsig_out);
+  void PredictLidarMeasurement(VectorXd *z_out, MatrixXd *S_out, MatrixXd *Zsig_out);
+  void UpdateRadarState(VectorXd* x_out, MatrixXd* P_out,
+                        const VectorXd& z, const VectorXd& z_pred,
+                        const MatrixXd& Zsig, const MatrixXd& S);
 };
 
 #endif /* UKF_H */

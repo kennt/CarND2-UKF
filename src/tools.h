@@ -12,7 +12,7 @@ public:
   /**
   * Constructor.
   */
-  Tools();
+  Tools(int state_vector_length);
 
   /**
   * Destructor.
@@ -23,6 +23,10 @@ public:
   * A helper method to calculate RMSE.
   */
   VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
+
+private:
+  // The length of the state vector
+  int state_vector_length_;
 
 };
 

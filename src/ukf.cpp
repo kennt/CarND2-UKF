@@ -26,14 +26,6 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
   P_.fill(0.0);
 
-
-  // Results
-  //  std_a, std_yawdd, RMSE
-  // 1.0, 0.5 : 0.0661, 0.0827, 0.3323, 0.2145
-  // 0.7, 0.5 : 0.0635, 0.0838, 0.3305, 0.2130
-  // 0.5, 0.5 : 
-  // 0.7, 0.4 : 0.0648, 0.0837, 0.3325, 0.2161
-
   // Process noise standard deviation longitudinal acceleration in m/s^2
   std_a_ = 0.7;
 

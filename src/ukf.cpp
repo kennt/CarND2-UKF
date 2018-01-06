@@ -26,11 +26,19 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
   P_.fill(0.0);
 
+
+  // Results
+  //  std_a, std_yawdd, RMSE
+  // 1.0, 0.5 : 0.0661, 0.0827, 0.3323, 0.2145
+  // 0.7, 0.5 : 0.0635, 0.0838, 0.3305, 0.2130
+  // 0.5, 0.5 : 
+  // 0.7, 0.4 : 0.0648, 0.0837, 0.3325, 0.2161
+
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 1;
+  std_a_ = 0.7;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.5;
+  std_yawdd_ = 1.0;
   
   //DO NOT MODIFY measurement noise values below these are provided by the sensor manufacturer.
   // Laser measurement noise standard deviation position1 in m
@@ -58,6 +66,8 @@ UKF::UKF() {
   */
   is_initialized_ = false;
 
+  // x_
+  // P_
   n_x_ = 5;
   n_aug_ = 7;
   lambda_ = 3 - n_x_;
@@ -180,46 +190,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 }
 
 
-VectorXd UKF::PredictVector(const VectorXd &inVector,
-                            double delta_t, double noise_a, double noise_phi)
-{
-  VectorXd result = VectorXd(inVector.size());
-
-  // Extract values from vector
-  double v = inVector(2);
-  double phi = inVector(3);
-  double phi_dot = inVector(4);
-  
-  // pre-calc some common values
-  double cos_phi = cos(phi);
-  double sin_phi = sin(phi);
-  double dt2 = delta_t*delta_t / 2.0;
-
-  // Avoid divide-by-zero
-  //$ TODO: tolerance should be a parameter
-  if (abs(phi_dot) < 0.0001)
-  {
-      result <<
-        v*cos_phi*delta_t + dt2*cos_phi*noise_a,
-        v*sin_phi*delta_t + dt2*sin_phi*noise_a,
-        0                 + delta_t*noise_a,
-        0                 + dt2*noise_phi,
-        0                 + delta_t*noise_phi;
-  }
-  else
-  {
-      result <<
-        v*(sin(phi + phi_dot*delta_t) - sin_phi)/phi_dot + dt2*cos_phi*noise_a,
-        v*(-cos(phi + phi_dot*delta_t) + cos_phi)/phi_dot + dt2*sin_phi*noise_a,
-        0                               + delta_t*noise_a,
-        phi_dot*delta_t                 + dt2*noise_phi,
-        0                               + delta_t*noise_phi;
-  }
-
-  return result;
-}
-
-
 VectorXd UKF::PredictAugVector(const VectorXd &inVector,
                                double delta_t)
 {
@@ -240,7 +210,7 @@ VectorXd UKF::PredictAugVector(const VectorXd &inVector,
 
   // Avoid divide-by-zero
   //$ TODO: tolerance should be a parameter
-  if (abs(phi_dot) < 0.0001)
+  if (abs(phi_dot) < 0.001)
   {
       result <<
         v*cos_phi*delta_t + dt2*cos_phi*noise_a,
@@ -351,10 +321,10 @@ void UKF::PredictMeanAndCovariance(VectorXd* x_out,
   VectorXd  x = VectorXd(n_x_);
   MatrixXd  P = MatrixXd(n_x_, n_x_);
 
+  //predict state mean
   x.fill(0.0);
   P.fill(0.0);
   
-  //predict state mean
   for (int i=0; i<Xsig_pred_.cols(); i++)
   {
       x += weights_(i) * Xsig_pred_.col(i);
@@ -459,6 +429,9 @@ void UKF::PredictRadarMeasurement(VectorXd* z_out, MatrixXd* S_out, MatrixXd* Zs
       NormalizeAngleInVector(temp, 1);
       S += weights_(i) * temp * temp.transpose();
   }
+
+  // Go through and normalize the angles
+  //NormalizeAngleInMatrix(S, 1);
 
   //write result
   *z_out = z_pred;

@@ -112,7 +112,6 @@ public:
 
 //private:
 public:
-  VectorXd PredictVector(const VectorXd &inVector, double delta_t, double noise_a, double noise_yaw);
   VectorXd PredictAugVector(const VectorXd &inVector, double delta_t);
   void GenerateSigmaPoints(MatrixXd* Xsig_out);
   void AugmentedSigmaPoints(MatrixXd* Xsig_out);
